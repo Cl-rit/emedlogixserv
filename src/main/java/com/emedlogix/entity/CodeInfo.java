@@ -19,8 +19,28 @@ public class CodeInfo {
 
     @Field(type = FieldType.Text, name = "code")
     private String code;
+    @Field(type = FieldType.Text, name = "billable")
+    private String billable;
     @Field(type = FieldType.Text, name = "description")
     private String shortDescription;
+    @Field(type = FieldType.Text, name = "longdescription")
+    private String longDescription;
+
+    public String getBillable() {
+        return billable;
+    }
+
+    public void setBillable(String billable) {
+        this.billable = billable;
+    }
+
+    public String getLongDescription() {
+        return longDescription;
+    }
+
+    public void setLongDescription(String longDescription) {
+        this.longDescription = longDescription;
+    }
 
     public String getId() {
         return id;

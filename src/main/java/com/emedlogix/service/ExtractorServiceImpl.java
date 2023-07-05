@@ -23,33 +23,78 @@ public class ExtractorServiceImpl implements ExtractorService {
 
     @Override
     public Map<String, CodeInfo> doExtractCodes() {
-        String fileStr = "/Users/mnachiappan/Documents/Development/clarit/icd10cm_codes_2023.txt";
-        logger.info("Start Extracting Codes from file {}", fileStr);
+        String fileStr = "D:\\textfile\\icd10cm_order.txt";
+        logger.info("Start Extracting Ordered Codes from file {}", fileStr);
         Map<String, CodeInfo> extractedData = new HashMap<>();
         try {
             BufferedReader reader = new BufferedReader(new FileReader(new File(fileStr)));
             String line;
             List<String> lines = new ArrayList<>();
             while ((line = reader.readLine()) != null) {
-                int index = line.indexOf("  ");
-                if (index != -1) {
-                    CodeInfo codeInfo = new CodeInfo();
-                    codeInfo.setCode(line.substring(0, index));
-                    codeInfo.setShortDescription(line.substring(index).trim());
-                    extractedData.put(codeInfo.getCode(), codeInfo);
+                if(line.trim().length()>0){
+                    CodeInfo details = parseDetails(line);
+                    extractedData.put(details.getCode(),details);
                 }
             }
-            reader.close();
         } catch (IOException e) {
 
         }
-        logger.info("Code details successfully extracted {}", extractedData.size());
+        logger.info("Code details successfully extracted ordered codes {}", extractedData.size());
         return extractedData;
     }
 
+    public CodeInfo parseDetails(String input) {
+        String tokens [] = input.split("[(?=\\s*$)]");
+
+        CodeInfo codeInfo = new CodeInfo();
+        int counter = 0;
+        boolean skip = false;
+        for (String token: tokens) {
+            if(!token.isEmpty()) {
+                if(counter == 3 && Character.isUpperCase(token.charAt(0)) && skip ) {
+                    if(token.length()>2 && codeInfo.getShortDescription().startsWith(token.substring(0,2)) ) {
+                        counter++;
+                    }
+                }
+                switch (counter) {
+                    case 0:
+                        counter++;
+                        break;
+                    case 1:
+                        codeInfo.setCode(token);
+                        counter++;
+                        break;
+                    case 2:
+                        codeInfo.setBillable(token);
+                        counter++;
+                        break;
+                    case 3:
+                        codeInfo.setShortDescription((concatenateDescription(codeInfo.getShortDescription(), token)).trim());
+                        skip=true;
+                        //counter++;
+                        break;
+                    case 4:
+                        codeInfo.setLongDescription((concatenateDescription(codeInfo.getLongDescription(), token)).trim());
+                        //counter++;
+                        break;
+                }
+            } else {
+                if(codeInfo.getShortDescription() != null && codeInfo.getShortDescription().length() > 0 && counter == 3) {
+                    counter++;
+                }
+            }
+        }
+        // System.out.println(codeDetails.toString());
+        return codeInfo;
+    }
+    private String concatenateDescription(String previous, String current) {
+        return (previous==null?"":previous)+" "+current.trim();
+    }
+
+
     @Override
     public Map<String, CodeDetails> doExtractOrderedCodes() {
-        String fileStr = "/Users/mnachiappan/Documents/Development/clarit/icd10cm_order_2023.txt";
+        String fileStr = "D:\\textfile\\icd10cm_order.txt";
         logger.info("Start Extracting Ordered Codes from file {}", fileStr);
         Map<String, CodeDetails> extractedData = new HashMap<>();
         try {

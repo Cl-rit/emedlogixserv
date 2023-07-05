@@ -6,12 +6,20 @@ import com.emedlogix.entity.CodeDetails;
 import com.emedlogix.entity.CodeInfo;
 import com.emedlogix.repository.DBCodeDetailsRepository;
 import com.emedlogix.repository.ESCodeInfoRepository;
+import org.elasticsearch.action.search.*;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -30,12 +38,16 @@ public class CodeSearchService implements CodeSearchController {
     @Autowired
     DBCodeDetailsRepository dbCodeDetailsRepository;
 
+
+
     @Override
     public CodeInfo getCodeInfo(String code) {
         logger.info("Getting Code Information for:", code);
         CodeInfo codeInfo = esCodeInfoRepository.getByCode(code);
         return codeInfo;
     }
+
+
 
     public List<CodeInfo> getCodeInfoMatches(String code) {
         logger.info("Getting Code Information for code starts with:", code);
@@ -50,8 +62,12 @@ public class CodeSearchService implements CodeSearchController {
         return codeInfoList;
     }
 
+
+
     public CodeDetails getCodeInfoDetails(@PathVariable String code){
         logger.info("Getting Code Information Details for code:", code);
         return dbCodeDetailsRepository.findByCode(code);
     }
+
+
 }
